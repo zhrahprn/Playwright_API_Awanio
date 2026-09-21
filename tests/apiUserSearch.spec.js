@@ -110,7 +110,7 @@ test('3. filter users by status (active & inactive) - berhasil', async () => {
   });
 });
 
-test('4. view detail active user (dynamic) - berhasil', async () => {
+test('4. get dynamic active user uuid - berhasil', async () => {
   const { token } = readTokenFile();
   const apiContext = await request.newContext();
 
@@ -132,11 +132,19 @@ test('4. view detail active user (dynamic) - berhasil', async () => {
   expect(bodyList.result).toBe(true);
   expect(bodyList.data.length).toBeGreaterThan(0);
 
-  const activeUser = bodyList.data.find(user => user.status === 'active');
-  expect(activeUser).toBeDefined();
-  const activeUuid = activeUser.uuid;
+  const activeUuid = bodyList.data.find(user => user.status === 'active')?.uuid;
+  expect(activeUuid).toBeDefined();
 
-  const resDetail = await apiContext.get(`https://api-dev-v2.awan.io/v2/sa/users/${activeUuid}`, {
+  writeTokenFile({ dynamicActiveUuid: activeUuid });
+});
+
+test('5. view detail active user (dynamic) - berhasil', async () => {
+  const { token, dynamicActiveUuid } = readTokenFile();
+  const apiContext = await request.newContext();
+
+  expect(dynamicActiveUuid).toBeDefined();
+
+  const resDetail = await apiContext.get(`https://api-dev-v2.awan.io/v2/sa/users/${dynamicActiveUuid}`, {
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -146,6 +154,6 @@ test('4. view detail active user (dynamic) - berhasil', async () => {
   expect(resDetail.status()).toBe(200);
   const bodyDetail = await resDetail.json();
   expect(bodyDetail.result).toBe(true);
-  expect(bodyDetail.data.uuid).toBe(activeUuid);
+  expect(bodyDetail.data.uuid).toBe(dynamicActiveUuid);
   expect(bodyDetail.data.status).toBe('active');
 });
