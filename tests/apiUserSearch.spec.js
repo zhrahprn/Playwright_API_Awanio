@@ -2,7 +2,6 @@ import { test, expect, request } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
-const USERNAME_TEST = 'testingqasatu';
 const TOKEN_FILE = path.resolve(__dirname, '../../playwright/.auth/api-token.json');
 
 function readTokenFile() {
@@ -61,7 +60,6 @@ test('2. search user by name - berhasil', async () => {
   expect(body.data.length).toBeGreaterThan(0);
   expect(body.data[0].name).toBe(searchQuery);
   
-  // Simpan UUID user aktif untuk test view detail nanti
   writeTokenFile({ activeUserUuid: body.data[0].uuid });
 });
 
@@ -112,20 +110,42 @@ test('3. filter users by status (active & inactive) - berhasil', async () => {
   });
 });
 
-test('4. view detail active user - berhasil', async () => {
-  const { token, activeUserUuid } = readTokenFile();
+test('4. view detail active user (dynamic) - berhasil', async () => {
+  const { token } = readTokenFile();
   const apiContext = await request.newContext();
 
-  const res = await apiContext.get(`https://api-dev-v2.awan.io/v2/sa/users/${activeUserUuid}`, {
+  const resList = await apiContext.get(`https://api-dev-v2.awan.io/v2/sa/users`, {
+    params: {
+      kind: 'account',
+      page: 1,
+      per_page: 15,
+      status: 'active',
+    },
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
   });
 
-  expect(res.status()).toBe(200);
-  const body = await res.json();
-  expect(body.result).toBe(true);
-  expect(body.data.uuid).toBe(activeUserUuid);
-  expect(body.data.status).toBe('active');
+  expect(resList.status()).toBe(200);
+  const bodyList = await resList.json();
+  expect(bodyList.result).toBe(true);
+  expect(bodyList.data.length).toBeGreaterThan(0);
+
+  const activeUser = bodyList.data.find(user => user.status === 'active');
+  expect(activeUser).toBeDefined();
+  const activeUuid = activeUser.uuid;
+
+  const resDetail = await apiContext.get(`https://api-dev-v2.awan.io/v2/sa/users/${activeUuid}`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  expect(resDetail.status()).toBe(200);
+  const bodyDetail = await resDetail.json();
+  expect(bodyDetail.result).toBe(true);
+  expect(bodyDetail.data.uuid).toBe(activeUuid);
+  expect(bodyDetail.data.status).toBe('active');
 });
