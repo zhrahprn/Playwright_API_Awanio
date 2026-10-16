@@ -10,11 +10,9 @@ test('POST login karyawan', async () => {
   const body = await res.json();
   expect(body.success).toBe(true);
 
-  // Ambil token dari body.data.token sesuai struktur JSON baru
   const extractedToken = body.data?.token || body.token;
   expect(extractedToken).toBeDefined();
 
-  // Simpan dengan key khusus employeeToken
   writeTokens({ employeeToken: extractedToken });
 
   const tokens = readTokenFile();

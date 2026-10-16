@@ -36,3 +36,52 @@ export async function getProfileApi(token) {
   });
   return res;
 }
+
+export async function createEmployeeApi(adminToken, employeeData) {
+  const apiContext = await request.newContext();
+  const res = await apiContext.post(`${BASE_URL}/employees`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`,
+    },
+    data: employeeData,
+  });
+  return res;
+}
+
+// API untuk mengambil list Department secara dinamis
+export async function getDepartmentsApi(adminToken) {
+  const apiContext = await request.newContext();
+  const res = await apiContext.get(`${BASE_URL}/departments`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${adminToken}`,
+    },
+  });
+  return res;
+}
+
+export async function updateEmployeeApi(adminToken, employeeId, updateData) {
+  const apiContext = await request.newContext();
+  const res = await apiContext.patch(`${BASE_URL}/employees/${employeeId}`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`,
+    },
+    data: updateData, 
+  });
+  return res;
+}
+
+export async function deleteEmployeeApi(adminToken, employeeId) {
+  const apiContext = await request.newContext();
+  const res = await apiContext.delete(`${BASE_URL}/employees/${employeeId}`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${adminToken}`,
+    },
+  });
+  return res;
+}

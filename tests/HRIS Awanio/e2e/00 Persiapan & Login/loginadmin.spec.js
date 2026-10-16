@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 import { adminLoginData } from '../../data/authData';
 import { loginAdminApi } from '../../components/authApi';
-import { writeTokens, readTokenFile } from '../../components/authHelper'; // Gunakan readTokenFile
+import { writeTokens, readTokenFile } from '../../components/authHelper'; 
 
 test('POST login admin', async () => {
+  //mengirim permintaan login 
   const res = await loginAdminApi(adminLoginData);
   expect(res.status()).toBe(200);
   
@@ -11,9 +12,9 @@ test('POST login admin', async () => {
   expect(body.success).toBe(true);
 
   const extractedToken = body.token || body.data?.token;
-  writeTokens({ adminToken: extractedToken });
+  writeTokens({ adminToken: extractedToken }); // menyimpan token admin dengan key khusus adminToken
 
-  const tokens = readTokenFile(); // Sesuaikan dengan nama fungsi yang diimport
+  const tokens = readTokenFile(); 
   expect(tokens.adminToken).toBeDefined();
   console.log('Admin Token berhasil disimpan:', tokens.adminToken);
 });
