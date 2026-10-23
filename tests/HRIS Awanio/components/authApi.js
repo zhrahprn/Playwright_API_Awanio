@@ -50,7 +50,7 @@ export async function createEmployeeApi(adminToken, employeeData) {
   return res;
 }
 
-// API untuk mengambil list Department secara dinamis
+// list data departement dinamis 
 export async function getDepartmentsApi(adminToken) {
   const apiContext = await request.newContext();
   const res = await apiContext.get(`${BASE_URL}/departments`, {
@@ -62,26 +62,110 @@ export async function getDepartmentsApi(adminToken) {
   return res;
 }
 
-export async function updateEmployeeApi(adminToken, employeeId, updateData) {
+// Mengambil kode verifikasi berdasarkan email dengan token admin
+export async function getVerificationCodeApi(adminToken, email) {
   const apiContext = await request.newContext();
-  const res = await apiContext.patch(`${BASE_URL}/employees/${employeeId}`, {
+  const res = await apiContext.get(`${BASE_URL}/auth/verification-code?email=${encodeURIComponent(email)}`, {
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${adminToken}`,
     },
-    data: updateData, 
   });
   return res;
 }
 
-export async function deleteEmployeeApi(adminToken, employeeId) {
+// Endpoint verifikasi akun 
+export async function verifyEmailApi(verifyData) {
+  const apiContext = await request.newContext();
+  const res = await apiContext.post(`${BASE_URL}/auth/verify`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    data: verifyData,
+  });
+  return res;
+}
+
+// Update data karyawan berdasarkan ID
+export async function updateEmployeeApi(token, employeeId, updateData) {
+  const apiContext = await request.newContext();
+  const res = await apiContext.patch(`${BASE_URL}/employees/${employeeId}`, { // Ubah PUT jadi PATCH
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    data: updateData,
+  });
+  return res;
+}
+
+// Hapus karyawan berdasarkan ID
+export async function deleteEmployeeApi(token, employeeId) {
   const apiContext = await request.newContext();
   const res = await apiContext.delete(`${BASE_URL}/employees/${employeeId}`, {
     headers: {
       'Accept': 'application/json',
-      'Authorization': `Bearer ${adminToken}`,
+      'Authorization': `Bearer ${token}`,
     },
   });
   return res;
 }
+
+// Tambahkan di authApi.js jika belum ada
+export async function getNotificationsApi(token, params = { only_unread: 'true', page: 1, limit: 20 }) {
+  const apiContext = await request.newContext();
+  const queryParams = new URLSearchParams(params).toString();
+  
+  const res = await apiContext.get(`${BASE_URL}/notifications?${queryParams}`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  return res;
+}
+
+// Tambahkan di authApi.js jika belum ada
+export async function getActivityLogsApi(token, params = { page: 1, limit: 20 }) {
+  const apiContext = await request.newContext();
+  const queryParams = new URLSearchParams(params).toString();
+  
+  const res = await apiContext.get(`${BASE_URL}/activity-logs?${queryParams}`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  return res;
+}
+
+// Menandai satu notifikasi sebagai sudah dibaca (Mark as read)
+export async function markNotificationAsReadApi(token, notificationId) {
+  const apiContext = await request.newContext();
+  
+  // Menggunakan method PATCH (atau PUT tergantung backend, umumnya PATCH untuk update status parsial)
+  const res = await apiContext.patch(`${BASE_URL}/notifications/${notificationId}/read`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  return res;
+}
+
+// Menandai semua notifikasi sebagai sudah dibaca (Mark all as read)
+export async function markAllNotificationsAsReadApi(token) {
+  const apiContext = await request.newContext();
+  
+  const res = await apiContext.patch(`${BASE_URL}/notifications/read-all`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  return res;
+}
+
+  

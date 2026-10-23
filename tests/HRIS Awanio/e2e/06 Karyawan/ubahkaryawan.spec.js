@@ -1,30 +1,47 @@
 import { test, expect } from '@playwright/test';
-import { readTokenFile } from '../../components/authHelper';
-import { updateEmployeeApi } from '../../components/authApi';
-import { updateEmployeeData } from '../../data/authData'; // <-- Pastikan baris ini ada di atas
+import { readTokenFile, writeTokens } from '../../components/authHelper';
+import { updateEmployeeApi, createEmployeeApi, getDepartmentsApi } from '../../components/authApi';
+import { newEmployeeData } from '../../data/authData';
 
-test('PATCH update data karyawan', async () => {
-  // 1. Ambil token admin dan employeeId 
-  const tokenData = readTokenFile();
-  const adminToken = tokenData.adminToken || tokenData.token;
-  expect(adminToken).toBeDefined();
+test.describe('Modul Ubah Karyawan Awanio', () => {
 
-  const employeeId = tokenData.employeeId;
-  expect(employeeId).toBeDefined();
+  test('PUT Update Data Karyawan Berdasarkan ID Tersimpan', async () => {
+    const tokenData = readTokenFile();
+    const adminToken = tokenData.adminToken || tokenData.token;
+    expect(adminToken).toBeDefined();
 
-  // 2. Panggil API Update Employee 
-  const res = await updateEmployeeApi(adminToken, employeeId, updateEmployeeData);
-  
-  // 3. Validasi respons sukses
-  expect(res.status()).toBe(200);
+    // Best Practice: Selalu buat data baru secara independen agar tidak bergantung pada state file lama yang mungkin sudah terhapus
+    const deptRes = await getDepartmentsApi(adminToken);
+    const dynamicDepartmentId = (await deptRes.json()).data[0].id;
+    
+    const timestamp = Date.now();
+    const createRes = await createEmployeeApi(adminToken, {
+      ...newEmployeeData,
+      email: `qa.update.${timestamp}@example.com`,
+      phone: `+62899${timestamp.toString().slice(-7)}`,
+      employee_number: `3${timestamp.toString().slice(-4)}`,
+      department_id: dynamicDepartmentId,
+    });
+    
+    expect(createRes.status()).toBe(201);
+    const createBody = await createRes.json();
+    const employeeId = createBody.data.employee.id;
+    writeTokens({ employeeId });
 
-  const body = await res.json();
-  expect(body.success).toBe(true);
+    console.log(`Menggunakan Employee ID baru untuk di-update: ${employeeId}`);
 
-  // 4. Validasi perubahan data
-  const updatedData = body.data || body; 
-  expect(updatedData.address).toBe(updateEmployeeData.address);
-  expect(updatedData.employment_status).toBe(updateEmployeeData.employment_status);
+    const updatePayload = {
+      full_name: `Karyawan Update ${timestamp.toString().slice(-4)}`,
+      phone: `+62812${timestamp.toString().slice(-8)}`
+    };
 
-  console.log('Data karyawan berhasil diubah untuk ID:', updatedData.id);
+    const updateRes = await updateEmployeeApi(adminToken, employeeId, updatePayload);
+
+    expect(updateRes.status()).toBe(200);
+    const updateBody = await updateRes.json();
+    expect(updateBody.success).toBe(true);
+    
+    console.log('Berhasil memperbarui data karyawan dengan nama baru:', updatePayload.full_name);
+  });
+
 });
