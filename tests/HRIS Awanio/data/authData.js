@@ -16,7 +16,7 @@ export const expectedAdminProfile = {
 
 export const newEmployeeData = {
   password: "Password123!",
-  full_name: "Karyawan Uji QA",
+  full_name: "Testing QA",
   phone: "+628997434404",
   gender: "male",
   birth_date: "1998-05-20",
@@ -27,7 +27,9 @@ export const newEmployeeData = {
 
 }
 
-export const updateEmployeeData = {
-  address: "Jl. Uji Coba No. 2",
-  employment_status: "contract",
-};
+  export const updateEmployeeData = {
+    address: "Jl. Uji Coba No. 2",
+    employment_status: "contract",
+  };
+
+  

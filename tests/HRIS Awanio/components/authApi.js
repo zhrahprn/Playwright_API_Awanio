@@ -168,4 +168,39 @@ export async function markAllNotificationsAsReadApi(token) {
   return res;
 }
 
-  
+// Di dalam file components/authApi.js
+export async function createLeaveRequestApi(token, payload) {
+  const apiContext = await request.newContext();
+  return await apiContext.post(`${process.env.BASE_URL || 'https://api-hris.awanio.com/api/v1'}/leave-requests`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    data: payload
+  });
+}
+
+export async function rejectLeaveRequestApi(token, leaveRequestId, reason = "Ditolak") {
+  const apiContext = await request.newContext();
+  return await apiContext.patch(`${process.env.BASE_URL || 'https://api-hris.awanio.com/api/v1'}/leave-requests/${leaveRequestId}/reject`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    data: { decision_note: reason }
+  });
+}
+
+// Di dalam file components/authApi.js
+export async function approveLeaveRequestApi(token, leaveRequestId) {
+  const apiContext = await request.newContext();
+  return await apiContext.patch(`${process.env.BASE_URL || 'https://api-hris.awanio.com/api/v1'}/leave-requests/${leaveRequestId}/approve`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    }
+  });
+}

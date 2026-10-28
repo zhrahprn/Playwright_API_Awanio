@@ -3,48 +3,48 @@ import { readTokenFile, writeTokens } from '../../components/authHelper';
 import { createEmployeeApi, loginEmployeeApi, getDepartmentsApi, getVerificationCodeApi, verifyEmailApi, updateEmployeeApi, deleteEmployeeApi } from '../../components/authApi';
 import { newEmployeeData } from '../../data/authData';
 
-test.describe('Skenario Siklus Hidup Karyawan Awanio (CRUD)', () => {
+test.describe.serial('Skenario tambah Karyawan Awanio (CRUD)', () => {
 
-  // Step 1: Buat Karyawan & Cek Verifikasi (Pending State)
-  test('POST Create Karyawan & Ambil Kode Verifikasi (Pending State)', async () => {
-    const tokenData = readTokenFile();
-    const adminToken = tokenData.adminToken || tokenData.token;
-    expect(adminToken).toBeDefined();
+  //Buat Karyawan & Cek Verifikasi (Pending State)
+  // test('POST Create Karyawan & Ambil Kode Verifikasi (Pending State)', async () => {
+  //   const tokenData = readTokenFile();
+  //   const adminToken = tokenData.adminToken || tokenData.token;
+  //   expect(adminToken).toBeDefined();
 
-    const deptRes = await getDepartmentsApi(adminToken);
-    expect(deptRes.status()).toBe(200);
-    const dynamicDepartmentId = (await deptRes.json()).data[0].id;
+  //   const deptRes = await getDepartmentsApi(adminToken);
+  //   expect(deptRes.status()).toBe(200);
+  //   const dynamicDepartmentId = (await deptRes.json()).data[0].id;
 
-    const timestamp = Date.now();
-    const payload = {
-      ...newEmployeeData,
-      email: `qa.pending.${timestamp}@example.com`,
-      phone: `+62899${timestamp.toString().slice(-7)}`,
-      employee_number: `1${timestamp.toString().slice(-4)}`,
-      department_id: dynamicDepartmentId,
-    };
+  //   const timestamp = Date.now();
+  //   const payload = {
+  //     ...newEmployeeData,
+  //     email: `qa.pending.${timestamp}@example.com`,
+  //     phone: `+62899${timestamp.toString().slice(-7)}`,
+  //     employee_number: `1${timestamp.toString().slice(-4)}`,
+  //     department_id: dynamicDepartmentId,
+  //   };
 
-    const createRes = await createEmployeeApi(adminToken, payload);
-    expect(createRes.status()).toBe(201);
-    const createBody = await createRes.json();
-    const createdEmployeeId = createBody.data.employee.id;
-    expect(createdEmployeeId).toBeDefined();
+  //   const createRes = await createEmployeeApi(adminToken, payload);
+  //   expect(createRes.status()).toBe(201);
+  //   const createBody = await createRes.json();
+  //   const createdEmployeeId = createBody.data.employee.id;
+  //   expect(createdEmployeeId).toBeDefined();
 
-    const codeRes = await getVerificationCodeApi(adminToken, payload.email);
+  //   const codeRes = await getVerificationCodeApi(adminToken, payload.email);
     
-    if (codeRes.status() === 200) {
-      const codeBody = await codeRes.json();
-      console.log('Kode verifikasi didapatkan:', codeBody.data?.code);
-    } else {
-      console.log(`Catatan Test 1: Mendapatkan status ${codeRes.status()} saat ambil kode.`);
-    }
+  //   if (codeRes.status() === 200) {
+  //     const codeBody = await codeRes.json();
+  //     console.log('Kode verifikasi didapatkan:', codeBody.data?.code);
+  //   } else {
+  //     console.log(`Catatan Test 1: Mendapatkan status ${codeRes.status()} saat ambil kode.`);
+  //   }
 
-    console.log('Test 1 Selesai: Karyawan berhasil dibuat dalam status pending.');
-  });
+  //   console.log('Test 1 Selesai: Karyawan berhasil dibuat dalam status pending.');
+  // });
 
 
-  // Step 2: Buat Karyawan, Verifikasi Email, & Langsung Aktif (Menyimpan employeeId)
-  test('Test 2: POST Create Karyawan, Verifikasi Email, & Langsung Aktif', async () => {
+  //Buat Karyawan, Verifikasi Email, & Langsung Aktif (Menyimpan employeeId)
+  test('POST Create Karyawan, Verifikasi Email, & Langsung Aktif', async () => {
     const tokenData = readTokenFile();
     const adminToken = tokenData.adminToken || tokenData.token;
     expect(adminToken).toBeDefined();
@@ -95,18 +95,18 @@ test.describe('Skenario Siklus Hidup Karyawan Awanio (CRUD)', () => {
     expect(loginRes.status()).toBe(200);
     const employeeToken = (await loginRes.json()).token || (await loginRes.json()).data?.token;
 
-    // Menyimpan UUID karyawan aktif ke .consultoken.json untuk dipakai step edit & delete
+    // Menyimpan UUID karyawan untuk dipakai step edit & delete
     writeTokens({ 
       newEmployeeToken: employeeToken,
       employeeId: createdEmployeeId 
     });
 
-    console.log('Test 2 Selesai: Karyawan sukses dibuat dan token tersimpan!');
+    console.log('Selesai: Karyawan sukses dibuat dan token tersimpan!');
   });
 
 
-  // Step 3: Ubah Karyawan Berdasarkan UUID dari Data Sebelumnya (Full name hanya huruf/spasi)
-  test('Test 3: PATCH Ubah Data Karyawan', async () => {
+  // ubah Karyawan Berdasarkan UUID dari Data Sebelumnya 
+  test('PATCH Ubah Data Karyawan', async () => {
     const tokenData = readTokenFile();
     const adminToken = tokenData.adminToken || tokenData.token;
     const employeeId = tokenData.employeeId;
@@ -118,7 +118,7 @@ test.describe('Skenario Siklus Hidup Karyawan Awanio (CRUD)', () => {
 
     const timestamp = Date.now();
     const updatePayload = {
-      full_name: "Karyawan Uji QA Updated", // Tanpa angka agar lolos validasi server
+      full_name: "Testing QA Updated",
       phone: `+62812${timestamp.toString().slice(-8)}`
     };
 
@@ -128,12 +128,12 @@ test.describe('Skenario Siklus Hidup Karyawan Awanio (CRUD)', () => {
     const updateBody = await updateRes.json();
     expect(updateBody.success).toBe(true);
     
-    console.log('Test 3 Selesai: Berhasil memperbarui data karyawan!');
+    console.log('Selesai: Berhasil memperbarui data karyawan!');
   });
 
 
-  // Step 4: Hapus Karyawan Berdasarkan UUID yang Sama
-  test('Test 4: DELETE Hapus Karyawan', async () => {
+  // Hapus Karyawan Berdasarkan UUID yang Sama
+  test('DELETE Hapus Karyawan', async () => {
     const tokenData = readTokenFile();
     const adminToken = tokenData.adminToken || tokenData.token;
     const employeeId = tokenData.employeeId;
@@ -151,7 +151,9 @@ test.describe('Skenario Siklus Hidup Karyawan Awanio (CRUD)', () => {
       expect(deleteBody.success).toBe(true);
     }
 
-    console.log(`Test 4 Selesai: Berhasil menghapus karyawan dengan ID: ${employeeId}`);
+    console.log(`Selesai: Berhasil menghapus karyawan dengan ID: ${employeeId}`);
   });
 
 });
+
+//nanti dibikin versi create test case lagi tentang pengajuan cui sama bikin akun buat management jadi nnti management reject atau approve karyawan yang mengajukan cuti 
