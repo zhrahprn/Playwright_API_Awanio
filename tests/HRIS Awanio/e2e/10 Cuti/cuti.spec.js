@@ -12,7 +12,6 @@ test.describe.serial('Pengajuan, Penolakan dan Persetujuan Cuti', () => {
   let managerToken;
   let leaveRequestId;
 
-  // Lakukan login karyawan sebelum seluruh test dijalankan
   test.beforeAll(async () => {
     const loginEmpRes = await loginEmployeeApi({
       email: 'citra.maharani@hris.click',
@@ -86,7 +85,7 @@ test.describe.serial('Pengajuan, Penolakan dan Persetujuan Cuti', () => {
 
     const leavePayload = {
       leave_type_id: "d9f5b10a-a22d-4a91-9adf-82ec0b78a5c7",
-      start_date: "2026-11-25", // Ubah tanggal sedikit agar tidak bentrok dengan cuti pertama
+      start_date: "2026-11-25", 
       end_date: "2026-11-26",
       reason: "Revisi pengajuan cuti keperluan keluarga"
     };

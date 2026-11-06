@@ -169,9 +169,10 @@ export async function markAllNotificationsAsReadApi(token) {
 }
 
 // Di dalam file components/authApi.js
+
 export async function createLeaveRequestApi(token, payload) {
   const apiContext = await request.newContext();
-  return await apiContext.post(`${process.env.BASE_URL || 'https://api-hris.awanio.com/api/v1'}/leave-requests`, {
+  return await apiContext.post(`${process.env.BASE_URL}/leave-requests`, {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -183,7 +184,7 @@ export async function createLeaveRequestApi(token, payload) {
 
 export async function rejectLeaveRequestApi(token, leaveRequestId, reason = "Ditolak") {
   const apiContext = await request.newContext();
-  return await apiContext.patch(`${process.env.BASE_URL || 'https://api-hris.awanio.com/api/v1'}/leave-requests/${leaveRequestId}/reject`, {
+  return await apiContext.patch(`${process.env.BASE_URL}/leave-requests/${leaveRequestId}/reject`, {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -193,14 +194,38 @@ export async function rejectLeaveRequestApi(token, leaveRequestId, reason = "Dit
   });
 }
 
-// Di dalam file components/authApi.js
 export async function approveLeaveRequestApi(token, leaveRequestId) {
   const apiContext = await request.newContext();
-  return await apiContext.patch(`${process.env.BASE_URL || 'https://api-hris.awanio.com/api/v1'}/leave-requests/${leaveRequestId}/approve`, {
+  return await apiContext.patch(`${process.env.BASE_URL}/leave-requests/${leaveRequestId}/approve`, {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     }
+  });
+}
+
+
+
+export async function getTodayAttendanceApi(token) {
+  const apiContext = await request.newContext();
+  return await apiContext.get(`${BASE_URL}/attendances/today`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    }
+  });
+}
+
+// 2. POST: Melakukan Check-in
+export async function checkInAttendanceApi(token, payload) {
+  const apiContext = await request.newContext();
+  return await apiContext.post(`${BASE_URL}/attendances/check-in`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    data: payload
   });
 }
